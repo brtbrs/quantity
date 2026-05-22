@@ -1,0 +1,24 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: quantity-api
+    env_file:
+      - .env
+    ports:
+      - "${API_PORT:-8000}:8000"
+    command: ["python", "-m", "uvicorn", "data_service.web.api_server:APIServer().app", "--host", "0.0.0.0", "--port", "8000"]
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: quantity-dashboard
+    env_file:
+      - .env
+    ports:
+      - "${DASHBOARD_PORT:-8501}:8501"
+    command: ["python", "-m", "streamlit", "run", "data_service/dashboard/dashboard_app.py", "--server.port", "8501", "--server.address", "0.0.0.0", "--browser.gatherUsageStats", "false"]
+    depends_on:
+      - api

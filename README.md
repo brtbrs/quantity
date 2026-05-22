@@ -1,360 +1,120 @@
-# 🚀 Quantitative Trading System
+# Quantitative Trading System (Docker-first)
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)](https://github.com/yourusername/tradingsystem)
+This repo can run entirely in Docker using `docker compose` (no host `pip install` needed).
 
-> **A comprehensive quantitative trading system with AI-powered analysis, real-time data processing, and advanced risk management**
+## 1) Prerequisites
+- Docker Engine + Docker Compose v2
+- (Optional) existing external PostgreSQL container if you prefer not to use the bundled `postgres` service
 
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Quick Start](#quick-start)
-- [Installation](#installation)
-- [Usage Examples](#usage-examples)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [License](#license)
-
-## 🎯 Overview
-
-This is a production-ready quantitative trading system that combines traditional financial analysis with cutting-edge AI/ML technologies. The system provides a complete pipeline from data collection to strategy execution, featuring real-time market data processing, advanced factor analysis, AI-powered sentiment analysis, and comprehensive risk management.
-
-### 🌟 Key Highlights
-
-- **🔬 Advanced Factor Analysis**: Multi-factor models with momentum, value, quality, and volatility factors
-- **🤖 AI/LLM Integration**: OpenAI GPT integration for market analysis and strategy recommendations
-- **📊 Real-time Data**: WebSocket-based real-time market data from multiple exchanges
-- **🎯 Strategy Framework**: Extensible strategy system with 8+ built-in quantitative strategies
-- **⚡ High Performance**: C++ core engine for low-latency order execution
-- **📈 Visualization**: Interactive dashboards with Plotly and Streamlit
-- **🛡️ Risk Management**: Comprehensive risk controls and portfolio management
-
-## ✨ Features
-
-### 📊 Data Management
-- **Multi-source Data**: Binance, Yahoo Finance, Alpha Vantage
-- **Real-time Streaming**: WebSocket connections for live market data
-- **Data Processing**: Automated data cleaning and feature engineering
-- **Storage**: SQLite, PostgreSQL, and Redis caching support
-
-### 🧠 AI & Machine Learning
-- **LLM Integration**: OpenAI GPT for market analysis and insights
-- **NLP Processing**: Sentiment analysis of news and social media
-- **ML Models**: XGBoost, Random Forest, Neural Networks
-- **Feature Engineering**: Technical indicators and statistical features
-
-### 📈 Quantitative Analysis
-- **Factor Models**: Momentum, Value, Quality, Size, Volatility factors
-- **Stock Screening**: Multi-factor stock selection and filtering
-- **Portfolio Optimization**: Risk parity and mean-variance optimization
-- **Performance Analysis**: Comprehensive backtesting and metrics
-
-### 🎮 Strategy Framework
-- **Extensible Design**: Easy to add custom strategies
-- **Built-in Strategies**: 8+ proven quantitative strategies
-- **Strategy Registry**: Centralized strategy management
-- **Parameter Optimization**: Automated strategy optimization
-
-### 🛡️ Risk Management
-- **Position Sizing**: Dynamic position sizing algorithms
-- **Risk Limits**: VaR, CVaR, drawdown, and leverage limits
-- **Portfolio Management**: Real-time portfolio monitoring
-- **Alert System**: Price and risk alerts
-
-### 🖥️ User Interfaces
-- **Web Dashboard**: FastAPI-based web interface
-- **Streamlit App**: Interactive data science dashboard
-- **Real-time Charts**: K-line charts with technical indicators
-- **Mobile Friendly**: Responsive design for all devices
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Python Layer (data_service/)             │
-├─────────────────────────────────────────────────────────────┤
-│  • Data Fetchers     • Strategy Framework    • AI/ML       │
-│  • Factor Analysis   • Backtesting Engine    • Visualization│
-│  • Storage Layer     • Real-time Data        • Web UI      │
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│                    C++ Core Engine (backend/)               │
-├─────────────────────────────────────────────────────────────┤
-│  • Order Execution   • Risk Management       • Portfolio   │
-│  • Data Loading      • Strategy Engine       • Performance │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## 🚀 Quick Start
-
-### 1. Clone the Repository
+## 2) Configure environment + API keys
 ```bash
-git clone https://github.com/yourusername/tradingsystem.git
-cd tradingsystem
+cp .env.example .env
+# then edit .env
 ```
 
-### 2. Install Dependencies
+Put keys in `.env`:
+- `OPENAI_API_KEY` for AI-powered analysis
+- `ALPHA_VANTAGE_API_KEY` for Alpha Vantage data
+- `BINANCE_API_KEY` + `BINANCE_API_SECRET` for Binance private endpoints
+
+## 3) Database (PostgreSQL) + DDL/DML
+This repository now ships PostgreSQL init SQL at:
+- `db/init/001_init.sql`
+
+It creates:
+- `market_data`
+- `trades`
+- `signals`
+- `performance`
+
+and seeds one default row in `performance` using `ON CONFLICT DO NOTHING`.
+
+### If you already run PostgreSQL in another docker-compose
+Set these in `.env` and either:
+1. remove/disable the `postgres` service in this repo’s compose, or
+2. keep it but change `POSTGRES_PORT` to avoid host-port conflict.
+
+## 4) Start every service with docker-compose
 ```bash
-# Install all features
-pip install -e .[ai,visualization,realtime,web]  # Full local development install
+# build images with all project extras preinstalled
+docker compose build
 
-# Or install specific features
-pip install -e .[ai]           # AI/ML features
-pip install -e .[visualization] # Charts and dashboards
-pip install -e .[realtime]      # Real-time data
-pip install -e .[web]          # Web interface
+# start postgres + api + dashboard
+docker compose up -d
+
+# watch logs
+docker compose logs -f api dashboard postgres
 ```
 
-### 3. Run Basic Example
+Services:
+- API: `http://localhost:8000`
+- Streamlit dashboard: `http://localhost:8501`
+- PostgreSQL: `localhost:${POSTGRES_PORT:-5432}`
+
+## 5) Run functional modules (all from containers)
+
+### a) Data Fetching / Data Management
 ```bash
-# Test data fetching (no API keys required)
-python examples/fetch_public_data.py
+# multi-source public data fetching demo
+docker compose run --rm api python examples/fetch_public_data.py
+
+# yahoo example
+docker compose run --rm api python examples/yahoo_example.py
+
+# real-time websocket chart demo
+docker compose run --rm api python demo_charts_websocket.py
 ```
 
-### 4. Launch Dashboard
+### b) Quantitative Analysis / Screening / Optimization
 ```bash
-# Start Streamlit dashboard
-python run_dashboard.py
-# Visit: http://localhost:8501
+# factor models + screening + optimization demo
+docker compose run --rm api python examples/factor_analysis_demo.py
 
-# Or start web interface
-python run_web_interface.py
-# Visit: http://localhost:8000
+# broader quant strategy demo
+docker compose run --rm api python examples/quantitative_strategies.py
 ```
 
-## 📦 Installation
-
-### Prerequisites
-- Python 3.8+ (Python 3.11 recommended)
-- pip 21+
-- Git
-- C++17 compatible compiler (only required when building `backend/`)
-- CMake 3.12+ (only required when building `backend/`)
-
-### Full Installation
+### c) Strategy Backtesting
 ```bash
-# 1. Clone repository
-git clone https://github.com/yourusername/tradingsystem.git
-cd tradingsystem
-
-# 2. Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# 3. Install Python dependencies
-pip install -e .[ai,visualization,realtime,web]  # Full local development install
-
-# 4. Build C++ backend (optional)
-cd backend
-mkdir build && cd build
-cmake ..
-make -j4
-cd ../..
-
-# 5. Configure API keys (optional)
-cp config.example.json config.json
-# Edit config.json with your API keys
+docker compose run --rm api python examples/extensible_strategy_demo.py
 ```
 
-
-### Dependency Profiles
-- `.[ai,visualization,realtime,web]`: **recommended for local development** to enable all major modules.
-- `.[web,visualization]`: **used by the Docker image** for a smaller runtime footprint focused on dashboard/web usage.
-
-If you need AI or real-time streaming capabilities inside Docker, build a custom image and install those extras as well.
-
-### API Keys (Optional)
-For full functionality, you can add API keys to `config.json`:
-```json
-{
-  "binance": {
-    "api_key": "your_binance_api_key",
-    "secret_key": "your_binance_secret"
-  },
-  "openai": {
-    "api_key": "your_openai_api_key"
-  },
-  "alpha_vantage": {
-    "api_key": "your_alpha_vantage_key"
-  }
-}
-```
-
-
-## ▶️ How to Run
-
-### Option A: Run locally (recommended for development)
+### d) AI-Powered Analysis
 ```bash
-# 1) Activate your environment
-source venv/bin/activate  # Windows: venv\Scripts\activate
+# requires OPENAI_API_KEY
 
-# 2) (Optional) verify installation
-python -c "import data_service; print('import ok')"
+docker compose run --rm api python examples/ai_sentiment_analysis.py
 
-# 3) Run one of the entry points
-python main.py
+docker compose run --rm api python examples/langchain_llm_demo.py
+
+docker compose run --rm api python examples/llm_nlp_complete_demo.py
 ```
 
-### Option B: Run the Streamlit dashboard
+### e) User Interfaces
 ```bash
-python run_dashboard.py
-# Open http://localhost:8501
+# already started via docker compose up -d
+# API UI: http://localhost:8000
+# Streamlit: http://localhost:8501
 ```
 
-### Option C: Run the FastAPI web interface
+### f) Tests
 ```bash
-python run_web_interface.py
-# Open http://localhost:8000
+docker compose run --rm api pytest -q
 ```
 
-### Option D: Run with Docker
+## 6) Validate that the system is "working"
+A practical validation path is:
+1. `docker compose up -d`
+2. Run public data fetch demo successfully.
+3. Run factor/strategy examples successfully.
+4. Run backtesting demo successfully.
+5. Run tests successfully.
+
+If all pass, the repo is operational as a quantitative research/trading framework in containerized mode.
+
+## 7) Stop and cleanup
 ```bash
-# Build image
-docker build -t quantity-system .
-
-# Start container
-docker run --rm -p 8000:8000 -p 8501:8501 quantity-system
-
-# API will be available at http://localhost:8000
+docker compose down
+# remove DB volume too (destructive)
+docker compose down -v
 ```
-
-### Option E: Verify with sample scripts
-```bash
-# Public market data fetch
-python examples/fetch_public_data.py
-
-# Quant strategy demo
-python examples/quantitative_strategies.py
-```
-
-## 💡 Usage Examples
-
-### Basic Data Fetching
-```python
-from data_service.fetchers import BinanceFetcher
-
-# Get cryptocurrency data (no API key required)
-fetcher = BinanceFetcher()
-btc_price = fetcher.get_current_price("BTCUSD")
-print(f"BTC Price: ${btc_price:,.2f}")
-```
-
-### Factor Analysis
-```python
-from data_service.factors import FactorCalculator, FactorScreener
-
-# Calculate factors
-calculator = FactorCalculator()
-factors = calculator.calculate_all_factors(symbol, prices, volumes)
-
-# Screen stocks
-screener = FactorScreener()
-results = screener.create_momentum_screener().screen_stocks(factor_data)
-```
-
-### Strategy Backtesting
-```python
-from data_service.backtest import BacktestEngine
-from data_service.strategies import MomentumStrategy
-
-# Run backtest
-engine = BacktestEngine(initial_capital=100000)
-strategy = MomentumStrategy()
-results = engine.run_backtest(strategy, historical_data)
-```
-
-### AI-Powered Analysis
-```python
-from data_service.ai import LLMIntegration
-
-# Get AI insights
-llm = LLMIntegration(provider="openai")
-analysis = llm.analyze_market(factor_data, price_data)
-print(f"AI Recommendation: {analysis.content}")
-```
-
-## 📚 Documentation
-
-### Module Documentation
-- [📊 Factor Analysis](README_Factor_Analysis.md) - Multi-factor models and stock screening
-- [🤖 AI & LLM Integration](README_AI_Modules.md) - AI-powered market analysis
-- [🎯 Quantitative Strategies](README_Quantitative_Strategies.md) - Trading strategies guide
-- [🌐 Web Interface](README_Web_Interface.md) - Web dashboard usage
-- [🔗 LangChain Integration](README_LangChain_LLM.md) - Advanced LLM features
-
-### Examples
-- `examples/fetch_public_data.py` - Basic data fetching
-- `examples/quantitative_strategies.py` - Strategy examples
-- `examples/factor_analysis_demo.py` - Factor analysis demo
-- `examples/llm_nlp_complete_demo.py` - AI features demo
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-pytest tests/ -v
-
-# Run specific test modules
-pytest tests/test_data_processor.py -v
-pytest tests/test_llm_integration.py -v
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-```bash
-# Install development dependencies
-pip install -e .[test,dev]
-
-# Run tests
-pytest tests/ -v
-
-# Run linting
-flake8 data_service/
-black data_service/
-```
-
-### Code Style
-- Follow PEP 8 for Python code
-- Use type hints
-- Add docstrings for all functions
-- Write tests for new features
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## ⚠️ Disclaimer
-
-This software is for educational and research purposes only. Trading involves substantial risk of loss and is not suitable for all investors. Past performance does not guarantee future results. Please consult with a financial advisor before making any investment decisions.
-
-## 🙏 Acknowledgments
-
-- [Binance API](https://binance-docs.github.io/apidocs/) for cryptocurrency data
-- [Yahoo Finance](https://finance.yahoo.com/) for stock market data
-- [OpenAI](https://openai.com/) for AI capabilities
-- [Streamlit](https://streamlit.io/) for dashboard framework
-- [FastAPI](https://fastapi.tiangolo.com/) for web framework
-
-
-
-<div align="center">
-  <p>Made with ❤️ by the Quantitative Trading Community</p>
-  <p>
-    <a href="https://github.com/yourusername/tradingsystem/stargazers">
-      <img src="https://img.shields.io/github/stars/yourusername/tradingsystem" alt="Stars">
-    </a>
-    <a href="https://github.com/yourusername/tradingsystem/network">
-      <img src="https://img.shields.io/github/forks/yourusername/tradingsystem" alt="Forks">
-    </a>
-    <a href="https://github.com/yourusername/tradingsystem/issues">
-      <img src="https://img.shields.io/github/issues/yourusername/tradingsystem" alt="Issues">
-    </a>
-  </p>
-</div> 

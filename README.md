@@ -100,7 +100,7 @@ cd tradingsystem
 ### 2. Install Dependencies
 ```bash
 # Install all features
-pip install -e .[ai,visualization,realtime,web]
+pip install -e .[ai,visualization,realtime,web]  # Full local development install
 
 # Or install specific features
 pip install -e .[ai]           # AI/ML features
@@ -129,9 +129,11 @@ python run_web_interface.py
 ## 📦 Installation
 
 ### Prerequisites
-- Python 3.8+
-- C++17 compatible compiler (for backend)
-- CMake 3.12+ (for backend)
+- Python 3.8+ (Python 3.11 recommended)
+- pip 21+
+- Git
+- C++17 compatible compiler (only required when building `backend/`)
+- CMake 3.12+ (only required when building `backend/`)
 
 ### Full Installation
 ```bash
@@ -144,7 +146,7 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # 3. Install Python dependencies
-pip install -e .[ai,visualization,realtime,web]
+pip install -e .[ai,visualization,realtime,web]  # Full local development install
 
 # 4. Build C++ backend (optional)
 cd backend
@@ -157,6 +159,13 @@ cd ../..
 cp config.example.json config.json
 # Edit config.json with your API keys
 ```
+
+
+### Dependency Profiles
+- `.[ai,visualization,realtime,web]`: **recommended for local development** to enable all major modules.
+- `.[web,visualization]`: **used by the Docker image** for a smaller runtime footprint focused on dashboard/web usage.
+
+If you need AI or real-time streaming capabilities inside Docker, build a custom image and install those extras as well.
 
 ### API Keys (Optional)
 For full functionality, you can add API keys to `config.json`:
@@ -173,6 +182,53 @@ For full functionality, you can add API keys to `config.json`:
     "api_key": "your_alpha_vantage_key"
   }
 }
+```
+
+
+## ▶️ How to Run
+
+### Option A: Run locally (recommended for development)
+```bash
+# 1) Activate your environment
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# 2) (Optional) verify installation
+python -c "import data_service; print('import ok')"
+
+# 3) Run one of the entry points
+python main.py
+```
+
+### Option B: Run the Streamlit dashboard
+```bash
+python run_dashboard.py
+# Open http://localhost:8501
+```
+
+### Option C: Run the FastAPI web interface
+```bash
+python run_web_interface.py
+# Open http://localhost:8000
+```
+
+### Option D: Run with Docker
+```bash
+# Build image
+docker build -t quantity-system .
+
+# Start container
+docker run --rm -p 8000:8000 -p 8501:8501 quantity-system
+
+# API will be available at http://localhost:8000
+```
+
+### Option E: Verify with sample scripts
+```bash
+# Public market data fetch
+python examples/fetch_public_data.py
+
+# Quant strategy demo
+python examples/quantitative_strategies.py
 ```
 
 ## 💡 Usage Examples

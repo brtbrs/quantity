@@ -1,0 +1,12 @@
+services:
+  quantity-api:
+    volumes:
+      - ./data_service:/app/data_service
+      - ./main.py:/app/main.py
+      - ./run_web_interface.py:/app/run_web_interface.py
+    command: ["python", "-m", "uvicorn", "data_service.web.api_server:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  quantity-dashboard:
+    volumes:
+      - ./data_service:/app/data_service
+      - ./run_dashboard.py:/app/run_dashboard.py

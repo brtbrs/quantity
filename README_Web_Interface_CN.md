@@ -36,7 +36,7 @@ pip install fastapi uvicorn jinja2 aiofiles
 python run_web_interface.py
 
 # 方法2：直接启动FastAPI服务器
-uvicorn data_service.web.api_server:APIServer().app --host 0.0.0.0 --port 8000 --reload
+uvicorn data_service.web.api_server:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ### 3. 访问界面
@@ -161,7 +161,7 @@ python run_web_interface.py
 ### 生产环境
 ```bash
 # 使用Gunicorn
-gunicorn data_service.web.api_server:APIServer().app -w 4 -k uvicorn.workers.UvicornWorker
+gunicorn data_service.web.api_server:app -w 4 -k uvicorn.workers.UvicornWorker
 
 # 使用Docker
 docker build -t trading-system .

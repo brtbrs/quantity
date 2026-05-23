@@ -46,6 +46,29 @@ docker compose up -d
 docker compose logs -f api dashboard postgres
 ```
 
+### Skip the build step (faster local startup)
+If you already built images previously (or you only changed mounted source files), you can skip an explicit build:
+```bash
+# starts services without forcing a rebuild
+docker compose up -d
+```
+
+If you want Compose to use existing images and fail instead of building missing ones:
+```bash
+docker compose up -d --no-build
+```
+
+### Use `docker-compose.override.yml`
+Docker Compose automatically loads `docker-compose.override.yml` when present, so this is enough:
+```bash
+docker compose up -d
+```
+
+To be explicit (or to use a differently named override file), pass files directly:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
+```
+
 Services:
 - API: `http://localhost:8000`
 - Streamlit dashboard: `http://localhost:8501`

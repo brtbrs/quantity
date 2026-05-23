@@ -26,7 +26,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 RUN if [ "$PRELOAD_NLP_MODELS" = "true" ]; then \
       python -m spacy download en_core_web_sm && \
-      python - <<'PY' \
+      python - <<'PY'
 import nltk
 from transformers import pipeline
 
@@ -36,7 +36,6 @@ for pkg in ("punkt", "stopwords", "wordnet"):
 pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
 print("Preloaded NLP assets")
 PY
-    ; \
     fi
 
 EXPOSE 8000 8501

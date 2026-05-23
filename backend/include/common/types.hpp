@@ -10,6 +10,7 @@ namespace trading {
 using Timestamp = std::chrono::system_clock::time_point;
 
 // 市场数据结构
+// English: Market data structure
 struct MarketData {
     std::string symbol;
     double last_price;
@@ -20,17 +21,23 @@ struct MarketData {
     Timestamp timestamp;
     
     // 可选的扩展数据
+    // English: Optional extended data
     std::map<std::string, double> indicators;  // 技术指标
+    // English: Technical indicators
     std::map<std::string, double> fundamentals;  // 基本面数据
+    // English: Fundamental data
 };
 
 // 订单方向
+// English: Order side
 enum class OrderSide {
     BUY,
     SELL
 };
 
+// 订单类
 // 订单类型
+// English: Order type
 enum class OrderType {
     MARKET,
     LIMIT,
@@ -39,6 +46,7 @@ enum class OrderType {
 };
 
 // 订单状态
+// English: Order status
 enum class OrderStatus {
     PENDING,
     FILLED,
@@ -48,6 +56,7 @@ enum class OrderStatus {
 };
 
 // 订单类
+// English: Order class
 class Order {
 public:
     Order(const std::string& symbol, OrderSide side, OrderType type, double quantity)
@@ -88,6 +97,7 @@ private:
 };
 
 // 持仓类
+// English: Position class
 class Position {
 public:
     Position(const std::string& symbol) : symbol_(symbol) {}
@@ -113,6 +123,7 @@ private:
 };
 
 // 投资组合类
+// English: Portfolio class
 class Portfolio {
 public:
     void updatePosition(const std::string& symbol, double quantity, double price) {
@@ -148,6 +159,7 @@ public:
 
 private:
     double cash_ = 1000000.0;  // 初始资金100万
+    // English: Initial capital: 1,000,000
     std::map<std::string, std::shared_ptr<Position>> positions_;
     double total_exposure_ = 0.0;
     double drawdown_ = 0.0;

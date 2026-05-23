@@ -4,34 +4,43 @@ from data_service.utils.logger import setup_logger
 
 def main():
     # 设置日志
+    # English: Set up logging
     logger = setup_logger("crypto_data")
     
     try:
         # 1. 初始化 Binance 数据获取器
+        # English: Initialize the Binance data fetcher
         fetcher = BinanceFetcher()
         
         # 2. 初始化数据处理器
+        # English: Initialize the data processor
         processor = DataProcessor()
         
         # 3. 获取 BTC 数据
+        # English: Fetch BTC data
         logger.info("正在获取 BTC 数据...")
         
         # 获取当前价格
+        # English: Fetch the current price
         btc_price = fetcher.get_current_price("BTCUSD")
         print(f"\nBTC 当前价格: ${btc_price:,.2f}")
         
         # 获取历史K线数据
+        # English: Fetch historical candlestick data
         df = fetcher.fetch_historical_data(
             symbol="BTCUSD",
             interval="1h"  # 1小时K线
+            # English: 1-hour candlestick interval
         )
         print("\n历史数据最后5条:")
         print(df.tail())
         
         # 4. 处理数据
+        # English: Process the data
         processed_data = processor.process_market_data(df)
         
         # 5. 打印分析结果
+        # English: Print analysis results
         print("\n=== 市场统计 ===")
         for key, value in processed_data.statistics.items():
             print(f"{key}: {value:.4f}")
@@ -41,6 +50,7 @@ def main():
             print(f"{key}: {value}")
         
         # 6. 获取市场深度
+        # English: Fetch market depth
         depth = fetcher.get_market_depth("BTCUSD", limit=5)
         print("\n=== 市场深度 ===")
         print("买盘:", depth['bids'])

@@ -105,6 +105,14 @@ class APIServer:
             else:
                 self.llm_integration = None
                 self.logger.warning("OPENAI_API_KEY not set; AI analysis features are disabled")
+            nlp_use_spacy = os.getenv("NLP_USE_SPACY", "true").lower() == "true"
+            nlp_use_transformers = os.getenv("NLP_USE_TRANSFORMERS", "false").lower() == "true"
+            nlp_auto_download = os.getenv("NLP_AUTO_DOWNLOAD_MODELS", "false").lower() == "true"
+            self.nlp_processor = NLPProcessor(
+                use_spacy=nlp_use_spacy,
+                use_transformers=nlp_use_transformers,
+                auto_download_models=nlp_auto_download,
+            )
             self.nlp_processor = NLPProcessor()
             self.sentiment_calculator = SentimentFactorCalculator()
             self.yahoo_fetcher = YahooFetcher()

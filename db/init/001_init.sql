@@ -1,3 +1,25 @@
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'quantuser') THEN
+        CREATE ROLE quantuser LOGIN PASSWORD 'quantpwd';
+    END IF;
+END
+$$;
+
+CREATE DATABASE quantitydibi OWNER quantuser;
+
+GRANT CONNECT ON DATABASE quantitydibi TO quantuser;
+
+GRANT USAGE ON SCHEMA public TO quantuser;
+
+GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO quantuser;
+
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO quantuser;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE ON TABLES TO quantuser;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO quantuser;
+
 CREATE TABLE IF NOT EXISTS market_data (
     id BIGSERIAL PRIMARY KEY,
     symbol TEXT NOT NULL,
@@ -45,6 +67,4 @@ CREATE TABLE IF NOT EXISTS performance (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO performance (date, total_pnl, daily_return, max_drawdown, sharpe_ratio, win_rate, total_trades)
-VALUES (CURRENT_DATE, 0, 0, 0, 0, 0, 0)
-ON CONFLICT (date) DO NOTHING;
+INSERT INTO performance (date, total_pnl, daily_return, max_drawdown, sharpe_ratio, win_rate, total_trades) VALUES (CURRENT_DATE, 0, 0, 0, 0, 0, 0) ON CONFLICT (date) DO NOTHING;

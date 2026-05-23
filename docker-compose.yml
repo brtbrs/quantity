@@ -1,23 +1,4 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: quantity-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-quantity}
-      POSTGRES_USER: ${POSTGRES_USER:-quantity}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quantitypass}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-quantity} -d ${POSTGRES_DB:-quantity}"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
   api:
     build:
       context: .
@@ -27,17 +8,14 @@ services:
       - .env
     environment:
       DB_TYPE: postgresql
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${POSTGRES_DB:-quantity}
-      DB_USER: ${POSTGRES_USER:-quantity}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-quantitypass}
+      DB_HOST: ${POSTGRES_HOST}
+      DB_PORT: ${POSTGRES_PORT}
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "${API_PORT:-8000}:8000"
     command: ["python", "-m", "uvicorn", "data_service.web.api_server:APIServer().app", "--host", "0.0.0.0", "--port", "8000"]
-    depends_on:
-      postgres:
-        condition: service_healthy
 
   dashboard:
     build:
@@ -48,18 +26,15 @@ services:
       - .env
     environment:
       DB_TYPE: postgresql
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${POSTGRES_DB:-quantity}
-      DB_USER: ${POSTGRES_USER:-quantity}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-quantitypass}
-      API_BASE_URL: http://api:8000
+      DB_HOST: ${POSTGRES_HOST}
+      DB_PORT: ${POSTGRES_PORT}
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      API_BASE_URL: http://api:${API_PORT:-8000}
     ports:
       - "${DASHBOARD_PORT:-8501}:8501"
     command: ["python", "-m", "streamlit", "run", "data_service/dashboard/dashboard_app.py", "--server.port", "8501", "--server.address", "0.0.0.0", "--browser.gatherUsageStats", "false"]
     depends_on:
       api:
         condition: service_started
-
-volumes:
-  postgres_data:

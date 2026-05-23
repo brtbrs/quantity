@@ -1,5 +1,4 @@
 from binance.client import Client
-from binance.websockets import BinanceSocketManager
 from datetime import datetime
 import pandas as pd
 import logging
@@ -85,6 +84,7 @@ class BinanceFetcher:
         """
         try:
             if not self.bm:
+                from binance.websockets import BinanceSocketManager
                 self.bm = BinanceSocketManager(self.client)
             
             # 创建K线数据连接

@@ -16,14 +16,25 @@ class BinanceFetcher:
         :param api_secret: Binance API secret (可选)
         """
         self.logger = logging.getLogger(__name__)
+        self.api_key = api_key
+        self.api_secret = api_secret
+        self.client = None
+        self.bm = None  # WebSocket管理器
+        self.ws_connections = {}  # 存储WebSocket连接
+        self.logger.info("Binance fetcher initialized (lazy client mode)")
+
+    def _get_client(self) -> Client:
+        """Lazily create Binance client to avoid network failures during service startup."""
+        if self.client is not None:
+            return self.client
+
         try:
-            self.client = Client(api_key, api_secret, tld='us')
-            self.bm = None  # WebSocket管理器
-            self.ws_connections = {}  # 存储WebSocket连接
-            self.logger.info("Binance fetcher initialized successfully")
-        except Exception as e:
-            self.logger.error(f"Failed to initialize Binance client: {str(e)}")
-            raise
+            self.client = Client(self.api_key, self.api_secret, tld='us', ping=False)
+        except TypeError:
+            # Fallback for python-binance versions without `ping` argument
+            self.client = Client(self.api_key, self.api_secret, tld='us')
+
+        return self.client
 
     def fetch_historical_data(
         self,
@@ -48,7 +59,8 @@ class BinanceFetcher:
             end_str = int(end_time.timestamp() * 1000) if end_time else None
             
             # 获取K线数据
-            klines = self.client.get_klines(
+            client = self._get_client()
+            klines = client.get_klines(
                 symbol=symbol,
                 interval=interval,
                 startTime=start_str,
@@ -85,7 +97,7 @@ class BinanceFetcher:
         try:
             if not self.bm:
                 from binance.websockets import BinanceSocketManager
-                self.bm = BinanceSocketManager(self.client)
+                self.bm = BinanceSocketManager(self._get_client())
             
             # 创建K线数据连接
             conn_key = f"{symbol.lower()}@kline_1m"
@@ -140,7 +152,8 @@ class BinanceFetcher:
         :return: 订单簿数据
         """
         try:
-            depth = self.client.get_order_book(symbol=symbol, limit=limit)
+            client = self._get_client()
+            depth = client.get_order_book(symbol=symbol, limit=limit)
             return {
                 'bids': [[float(price), float(qty)] for price, qty in depth['bids']],
                 'asks': [[float(price), float(qty)] for price, qty in depth['asks']]
@@ -157,7 +170,8 @@ class BinanceFetcher:
         :return: 最近成交数据
         """
         try:
-            trades = self.client.get_recent_trades(symbol=symbol, limit=limit)
+            client = self._get_client()
+            trades = client.get_recent_trades(symbol=symbol, limit=limit)
             df = pd.DataFrame(trades)
             df['time'] = pd.to_datetime(df['time'], unit='ms')
             df['price'] = df['price'].astype(float)

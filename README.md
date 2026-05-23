@@ -56,38 +56,38 @@ Services:
 ### a) Data Fetching / Data Management
 ```bash
 # multi-source public data fetching demo
-docker compose run --rm api python examples/fetch_public_data.py
+docker compose run --rm quantity-api python examples/fetch_public_data.py
 
 # yahoo example
-docker compose run --rm api python examples/yahoo_example.py
+docker compose run --rm quantity-api python examples/yahoo_example.py
 
 # real-time websocket chart demo
-docker compose run --rm api python demo_charts_websocket.py
+docker compose run --rm quantity-api python demo_charts_websocket.py
 ```
 
 ### b) Quantitative Analysis / Screening / Optimization
 ```bash
 # factor models + screening + optimization demo
-docker compose run --rm api python examples/factor_analysis_demo.py
+docker compose run --rm quantity-api python examples/factor_analysis_demo.py
 
 # broader quant strategy demo
-docker compose run --rm api python examples/quantitative_strategies.py
+docker compose run --rm quantity-api python examples/quantitative_strategies.py
 ```
 
 ### c) Strategy Backtesting
 ```bash
-docker compose run --rm api python examples/extensible_strategy_demo.py
+docker compose run --rm quantity-api python examples/extensible_strategy_demo.py
 ```
 
 ### d) AI-Powered Analysis
 ```bash
 # requires OPENAI_API_KEY
 
-docker compose run --rm api python examples/ai_sentiment_analysis.py
+docker compose run --rm quantity-api python examples/ai_sentiment_analysis.py
 
-docker compose run --rm api python examples/langchain_llm_demo.py
+docker compose run --rm quantity-api python examples/langchain_llm_demo.py
 
-docker compose run --rm api python examples/llm_nlp_complete_demo.py
+docker compose run --rm quantity-api python examples/llm_nlp_complete_demo.py
 ```
 
 ### e) User Interfaces
@@ -99,7 +99,7 @@ docker compose run --rm api python examples/llm_nlp_complete_demo.py
 
 ### f) Tests
 ```bash
-docker compose run --rm api pytest -q
+docker compose run --rm quantity-api pytest -q
 ```
 
 ## 6) Validate that the system is "working"

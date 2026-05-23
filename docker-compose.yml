@@ -1,9 +1,9 @@
 services:
-  api:
+  quantity-api:
+    container_name: quantity-api
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: quantity-api
     env_file:
       - .env
     environment:
@@ -17,11 +17,11 @@ services:
       - "${API_PORT:-8000}:8000"
     command: ["python", "-m", "uvicorn", "data_service.web.api_server:APIServer().app", "--host", "0.0.0.0", "--port", "8000"]
 
-  dashboard:
+  quantity-dashboard:
+    container_name: quantity-dashboard
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: quantity-dashboard
     env_file:
       - .env
     environment:
@@ -36,5 +36,5 @@ services:
       - "${DASHBOARD_PORT:-8501}:8501"
     command: ["python", "-m", "streamlit", "run", "data_service/dashboard/dashboard_app.py", "--server.port", "8501", "--server.address", "0.0.0.0", "--browser.gatherUsageStats", "false"]
     depends_on:
-      api:
+      quantity-api:
         condition: service_started

@@ -15,6 +15,7 @@ import logging
 from datetime import datetime, timedelta
 import asyncio
 import json
+import os
 
 # Import our trading system modules
 try:
@@ -24,7 +25,6 @@ try:
     from ..ai import LLMIntegration, NLPProcessor, SentimentFactorCalculator
     from ..fetchers import YahooFetcher, BinanceFetcher
     from ..storage import DatabaseManager
-    from ..utils import Logger
 except ImportError as e:
     logging.error(f"Failed to import trading modules: {e}")
 
@@ -99,8 +99,20 @@ class APIServer:
             self.factor_screener = FactorScreener()
             self.factor_backtest = FactorBacktest()
             self.strategy_registry = StrategyRegistry()
-            self.llm_integration = LLMIntegration()
-            self.nlp_processor = NLPProcessor()
+            openai_api_key = os.getenv("OPENAI_API_KEY")
+            if openai_api_key:
+                self.llm_integration = LLMIntegration(api_key=openai_api_key)
+            else:
+                self.llm_integration = None
+                self.logger.warning("OPENAI_API_KEY not set; AI analysis features are disabled")
+            nlp_use_spacy = os.getenv("NLP_USE_SPACY", "true").lower() == "true"
+            nlp_use_transformers = os.getenv("NLP_USE_TRANSFORMERS", "false").lower() == "true"
+            nlp_auto_download = os.getenv("NLP_AUTO_DOWNLOAD_MODELS", "false").lower() == "true"
+            self.nlp_processor = NLPProcessor(
+                use_spacy=nlp_use_spacy,
+                use_transformers=nlp_use_transformers,
+                auto_download_models=nlp_auto_download,
+            )
             self.sentiment_calculator = SentimentFactorCalculator()
             self.yahoo_fetcher = YahooFetcher()
             self.binance_fetcher = BinanceFetcher()

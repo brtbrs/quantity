@@ -28,7 +28,7 @@ def main():
         # Start the FastAPI server
         server_process = subprocess.Popen([
             sys.executable, "-m", "uvicorn", 
-            "data_service.web.api_server:APIServer().app",
+            "data_service.web.api_server:app",
             "--host", "0.0.0.0",
             "--port", "8000",
             "--reload"

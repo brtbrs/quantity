@@ -345,5 +345,9 @@ def main():
     server = APIServer()
     server.run(debug=True)
 
+# ASGI app instance for uvicorn/gunicorn, e.g.:
+# uvicorn data_service.web.api_server:app --host 0.0.0.0 --port 8000
+app = APIServer().app
+
 if __name__ == "__main__":
-    main() 
+    main()

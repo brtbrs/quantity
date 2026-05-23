@@ -5,6 +5,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+ARG PRELOAD_NLP_MODELS=true
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
@@ -21,6 +23,20 @@ COPY run_web_interface.py run_dashboard.py main.py ./
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -e .[ai,visualization,realtime,web,test] && \
     pip install --no-cache-dir psycopg2-binary
+
+RUN if [ "$PRELOAD_NLP_MODELS" = "true" ]; then \
+      python -m spacy download en_core_web_sm && \
+      python - <<'PY'
+import nltk
+from transformers import pipeline
+
+for pkg in ("punkt", "stopwords", "wordnet"):
+    nltk.download(pkg)
+
+pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
+print("Preloaded NLP assets")
+PY
+    fi
 
 EXPOSE 8000 8501
 

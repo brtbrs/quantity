@@ -36,10 +36,11 @@ class SentimentResult:
 class NLPProcessor:
     """NLP processing for financial text analysis"""
     
-    def __init__(self, use_spacy: bool = True, use_transformers: bool = True):
+    def __init__(self, use_spacy: bool = True, use_transformers: bool = True, auto_download_models: bool = True):
         self.logger = logging.getLogger(__name__)
         self.use_spacy = use_spacy
         self.use_transformers = use_transformers
+        self.auto_download_models = auto_download_models
         
         # Initialize NLP components
         self._init_nlp_components()
@@ -68,9 +69,13 @@ class NLPProcessor:
                     self.nlp = spacy.load("en_core_web_sm")
                     self.logger.info("spaCy model loaded successfully")
                 except OSError:
-                    self.logger.warning("spaCy model not found, downloading...")
-                    spacy.cli.download("en_core_web_sm")
-                    self.nlp = spacy.load("en_core_web_sm")
+                    if self.auto_download_models:
+                        self.logger.warning("spaCy model not found, downloading...")
+                        spacy.cli.download("en_core_web_sm")
+                        self.nlp = spacy.load("en_core_web_sm")
+                    else:
+                        self.logger.warning("spaCy model not found; set NLP_AUTO_DOWNLOAD_MODELS=true to enable auto-download")
+                        self.nlp = None
             else:
                 self.nlp = None
             
@@ -100,17 +105,20 @@ class NLPProcessor:
                 try:
                     nltk.data.find('tokenizers/punkt')
                 except LookupError:
-                    nltk.download('punkt')
+                    if self.auto_download_models:
+                        nltk.download('punkt')
                 
                 try:
                     nltk.data.find('corpora/stopwords')
                 except LookupError:
-                    nltk.download('stopwords')
+                    if self.auto_download_models:
+                        nltk.download('stopwords')
                 
                 try:
                     nltk.data.find('corpora/wordnet')
                 except LookupError:
-                    nltk.download('wordnet')
+                    if self.auto_download_models:
+                        nltk.download('wordnet')
                 
                 self.stop_words = set(stopwords.words('english'))
                 self.lemmatizer = WordNetLemmatizer()

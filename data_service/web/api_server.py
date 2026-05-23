@@ -113,7 +113,6 @@ class APIServer:
                 use_transformers=nlp_use_transformers,
                 auto_download_models=nlp_auto_download,
             )
-            self.nlp_processor = NLPProcessor()
             self.sentiment_calculator = SentimentFactorCalculator()
             self.yahoo_fetcher = YahooFetcher()
             self.binance_fetcher = BinanceFetcher()

@@ -1,4 +1,3 @@
-import yfinance as yf
 import pandas as pd
 from datetime import datetime, timedelta
 from typing import Optional
@@ -33,6 +32,7 @@ class YahooFetcher:
                 end_time = datetime.now()
 
             # 获取数据
+            import yfinance as yf
             ticker = yf.Ticker(symbol)
             df = ticker.history(
                 start=start_time,
@@ -53,6 +53,7 @@ class YahooFetcher:
     def get_company_info(self, symbol: str) -> dict:
         """获取公司信息"""
         try:
+            import yfinance as yf
             ticker = yf.Ticker(symbol)
             info = ticker.info
             return {
@@ -71,6 +72,7 @@ class YahooFetcher:
     def get_financial_data(self, symbol: str) -> dict:
         """获取财务数据"""
         try:
+            import yfinance as yf
             ticker = yf.Ticker(symbol)
             return {
                 'balance_sheet': ticker.balance_sheet,

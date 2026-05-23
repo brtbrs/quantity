@@ -15,6 +15,7 @@ import logging
 from datetime import datetime, timedelta
 import asyncio
 import json
+import os
 
 # Import our trading system modules
 try:
@@ -24,7 +25,6 @@ try:
     from ..ai import LLMIntegration, NLPProcessor, SentimentFactorCalculator
     from ..fetchers import YahooFetcher, BinanceFetcher
     from ..storage import DatabaseManager
-    from ..utils import Logger
 except ImportError as e:
     logging.error(f"Failed to import trading modules: {e}")
 
@@ -93,24 +93,55 @@ class APIServer:
     def _initialize_components(self):
         """Initialize trading system components"""
         try:
-            self.backtest_engine = BacktestEngine()
-            self.performance_analyzer = PerformanceAnalyzer()
-            self.factor_calculator = FactorCalculator()
-            self.factor_screener = FactorScreener()
-            self.factor_backtest = FactorBacktest()
-            self.strategy_registry = StrategyRegistry()
-            self.llm_integration = LLMIntegration()
-            self.nlp_processor = NLPProcessor()
-            self.sentiment_calculator = SentimentFactorCalculator()
-            self.yahoo_fetcher = YahooFetcher()
-            self.binance_fetcher = BinanceFetcher()
-            self.db_manager = DatabaseManager()
-            
-            self.logger.info("Trading system components initialized successfully")
-            
+            self.backtest_engine = self._safe_initialize("BacktestEngine", BacktestEngine)
+            self.performance_analyzer = self._safe_initialize("PerformanceAnalyzer", PerformanceAnalyzer)
+            self.factor_calculator = self._safe_initialize("FactorCalculator", FactorCalculator)
+            self.factor_screener = self._safe_initialize("FactorScreener", FactorScreener)
+            self.factor_backtest = self._safe_initialize("FactorBacktest", FactorBacktest)
+            self.strategy_registry = self._safe_initialize("StrategyRegistry", StrategyRegistry)
+
+            openai_api_key = os.getenv("OPENAI_API_KEY")
+            if openai_api_key:
+                self.llm_integration = self._safe_initialize("LLMIntegration", LLMIntegration, api_key=openai_api_key)
+            else:
+                self.llm_integration = None
+                self.logger.warning("OPENAI_API_KEY not set; AI analysis features are disabled")
+
+            nlp_use_spacy = os.getenv("NLP_USE_SPACY", "true").lower() == "true"
+            nlp_use_transformers = os.getenv("NLP_USE_TRANSFORMERS", "false").lower() == "true"
+            nlp_auto_download = os.getenv("NLP_AUTO_DOWNLOAD_MODELS", "false").lower() == "true"
+            self.nlp_processor = self._safe_initialize(
+                "NLPProcessor",
+                NLPProcessor,
+                use_spacy=nlp_use_spacy,
+                use_transformers=nlp_use_transformers,
+                auto_download_models=nlp_auto_download,
+            )
+
+            self.sentiment_calculator = self._safe_initialize("SentimentFactorCalculator", SentimentFactorCalculator)
+            self.yahoo_fetcher = self._safe_initialize("YahooFetcher", YahooFetcher)
+            self.binance_fetcher = self._safe_initialize("BinanceFetcher", BinanceFetcher)
+            self.db_manager = self._safe_initialize("DatabaseManager", DatabaseManager)
+
+            self.logger.info("Trading system components initialization attempted")
+
         except Exception as e:
             self.logger.error(f"Failed to initialize components: {e}")
     
+    def _safe_initialize(self, name: str, constructor, *args, **kwargs):
+        """Safely initialize optional components without failing whole server startup."""
+        if constructor is None:
+            self.logger.warning(f"{name} is unavailable; skipping initialization")
+            return None
+        if not callable(constructor):
+            self.logger.warning(f"{name} constructor is not callable ({type(constructor)}); skipping")
+            return None
+        try:
+            return constructor(*args, **kwargs)
+        except Exception as e:
+            self.logger.warning(f"{name} initialization failed: {e}")
+            return None
+
     def _setup_routes(self):
         """Setup API routes"""
         

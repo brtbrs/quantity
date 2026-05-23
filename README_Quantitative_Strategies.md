@@ -1,132 +1,132 @@
-# 量化交易策略集合
+# Quantitative Trading Strategy Collection
 
-基于我们的量化因子分析框架，这里提供了8个实用的量化交易策略，涵盖不同的投资风格和风险偏好。
+Built on our quantitative factor analysis framework, this guide provides 8 practical quantitative trading strategies across different investment styles and risk preferences.
 
-## 🎯 策略概览
+## 🎯 Strategy Overview
 
-| 策略名称 | 投资风格 | 风险等级 | 适用市场 | 换手率 |
-|---------|---------|---------|---------|--------|
-| 动量策略 | 趋势跟踪 | 中高 | 牛市 | 高 |
-| 价值策略 | 价值投资 | 中 | 震荡市 | 低 |
-| 质量成长策略 | 成长投资 | 中高 | 成长股 | 中 |
-| 多因子策略 | 综合 | 中 | 全市场 | 中 |
-| 均值回归策略 | 反转 | 中高 | 震荡市 | 高 |
-| 低波动策略 | 防御 | 低 | 熊市 | 低 |
-| 行业轮动策略 | 宏观 | 中高 | 周期股 | 高 |
-| 风险平价策略 | 风险控制 | 中 | 全市场 | 中 |
+| Strategy Name | Investment Style | Risk Level | Suitable Market | Turnover |
+|--------------|------------------|------------|------------------|----------|
+| Momentum Strategy | Trend Following | Medium-High | Bull Markets | High |
+| Value Strategy | Value Investing | Medium | Range-Bound Markets | Low |
+| Quality Growth Strategy | Growth Investing | Medium-High | Growth Stocks | Medium |
+| Multi-Factor Strategy | Blended | Medium | Broad Market | Medium |
+| Mean Reversion Strategy | Reversal | Medium-High | Range-Bound Markets | High |
+| Low Volatility Strategy | Defensive | Low | Bear Markets | Low |
+| Sector Rotation Strategy | Macro / Cyclical | Medium-High | Cyclical Sectors | High |
+| Risk Parity Strategy | Risk Control | Medium | Broad Market | Medium |
 
-## 📊 详细策略说明
+## 📊 Detailed Strategy Descriptions
 
-### 1. 动量策略 (Momentum Strategy)
+### 1. Momentum Strategy
 
-**核心理念**: 趋势会延续，强者恒强
+**Core Idea**: Trends tend to persist; strong assets often stay strong.
 
-**策略逻辑**:
-- 选择过去60天动量最强的股票
-- 等权重配置
-- 月度调仓
+**Strategy Logic**:
+- Select stocks with the strongest 60-day momentum
+- Equal-weight allocation
+- Monthly rebalancing
 
-**适用条件**:
-- 市场处于上升趋势
-- 流动性充足
-- 波动率适中
+**Best Conditions**:
+- Market is in an uptrend
+- Sufficient liquidity
+- Moderate volatility
 
-**风险提示**:
-- 趋势反转时损失较大
-- 需要及时止损
-- 换手率较高
+**Risk Notes**:
+- Large losses can occur during trend reversals
+- Requires timely stop-loss execution
+- Relatively high turnover
 
 ```python
-# 动量策略示例
+# Momentum strategy example
 momentum_result = strategies.momentum_strategy(
     factor_data, price_data,
-    lookback_period=60,  # 60天动量
-    top_n=20            # 选择前20只股票
+    lookback_period=60,  # 60-day momentum
+    top_n=20             # select top 20 stocks
 )
 ```
 
-### 2. 价值策略 (Value Strategy)
+### 2. Value Strategy
 
-**核心理念**: 价格终将回归价值
+**Core Idea**: Price eventually converges toward intrinsic value.
 
-**策略逻辑**:
-- 选择低P/E、低P/B的股票
-- 要求股息率>2%
-- ROE>10%
-- 季度调仓
+**Strategy Logic**:
+- Select low P/E and low P/B stocks
+- Require dividend yield > 2%
+- ROE > 10%
+- Quarterly rebalancing
 
-**适用条件**:
-- 市场估值合理或偏低
-- 经济基本面稳定
-- 利率环境适中
+**Best Conditions**:
+- Market valuations are fair or undervalued
+- Stable economic fundamentals
+- Moderate interest-rate environment
 
-**风险提示**:
-- 价值陷阱风险
-- 需要耐心等待
-- 可能错过成长股
+**Risk Notes**:
+- Value trap risk
+- Requires patience
+- May miss high-growth names
 
 ```python
-# 价值策略示例
+# Value strategy example
 value_result = strategies.value_strategy(
     factor_data, price_data,
-    max_pe=15.0,        # P/E < 15
-    max_pb=2.0,         # P/B < 2
-    top_n=30            # 选择30只股票
+    max_pe=15.0,         # P/E < 15
+    max_pb=2.0,          # P/B < 2
+    top_n=30             # select 30 stocks
 )
 ```
 
-### 3. 质量成长策略 (Quality Growth Strategy)
+### 3. Quality Growth Strategy
 
-**核心理念**: 优质公司长期创造价值
+**Core Idea**: High-quality companies create long-term value.
 
-**策略逻辑**:
+**Strategy Logic**:
 - ROE > 15%
-- 负债率 < 50%
-- 流动比率 > 1.5
-- 60天动量 > 10%
+- Debt ratio < 50%
+- Current ratio > 1.5
+- 60-day momentum > 10%
 
-**适用条件**:
-- 经济稳定增长
-- 行业集中度提升
-- 利率环境宽松
+**Best Conditions**:
+- Stable economic growth
+- Increasing industry concentration
+- Accommodative rate environment
 
-**风险提示**:
-- 估值可能过高
-- 对经济周期敏感
-- 需要深度研究
+**Risk Notes**:
+- Valuations may become expensive
+- Sensitive to economic cycles
+- Requires deeper fundamental research
 
 ```python
-# 质量成长策略示例
+# Quality growth strategy example
 quality_result = strategies.quality_growth_strategy(
     factor_data, price_data,
-    min_roe=15.0,       # ROE > 15%
-    min_growth=10.0     # 动量 > 10%
+    min_roe=15.0,        # ROE > 15%
+    min_growth=10.0      # momentum > 10%
 )
 ```
 
-### 4. 多因子策略 (Multi-Factor Strategy)
+### 4. Multi-Factor Strategy
 
-**核心理念**: 多维度评估，分散风险
+**Core Idea**: Use multiple dimensions to diversify risk.
 
-**策略逻辑**:
-- 动量因子 30%
-- 价值因子 20%
-- 质量因子 20%
-- 波动率因子 15%
-- 规模因子 15%
+**Strategy Logic**:
+- Momentum factor: 30%
+- Value factor: 20%
+- Quality factor: 20%
+- Volatility factor: 15%
+- Size factor: 15%
 
-**适用条件**:
-- 全市场环境
-- 因子有效性稳定
-- 数据质量良好
+**Best Conditions**:
+- Broad market exposure
+- Stable factor effectiveness
+- High-quality data
 
-**风险提示**:
-- 因子失效风险
-- 需要持续优化
-- 计算复杂度高
+**Risk Notes**:
+- Factor decay / failure risk
+- Requires continuous optimization
+- Higher computational complexity
 
 ```python
-# 多因子策略示例
+# Multi-factor strategy example
 factor_weights = {
     'momentum_60d': 0.3,
     'pe_ratio': 0.2,
@@ -141,28 +141,28 @@ multi_result = strategies.multi_factor_strategy(
 )
 ```
 
-### 5. 均值回归策略 (Mean Reversion Strategy)
+### 5. Mean Reversion Strategy
 
-**核心理念**: 价格偏离均值后会回归
+**Core Idea**: Prices tend to revert after significant deviation from the mean.
 
-**策略逻辑**:
-- RSI < 30 (超卖)
-- 20天动量在-20%到0%之间
-- 波动率 < 40%
-- 短期持有
+**Strategy Logic**:
+- RSI < 30 (oversold)
+- 20-day momentum between -20% and 0%
+- Volatility < 40%
+- Short holding period
 
-**适用条件**:
-- 震荡市场
-- 个股基本面稳定
-- 技术分析有效
+**Best Conditions**:
+- Sideways / range-bound markets
+- Stable company fundamentals
+- Effective technical signals
 
-**风险提示**:
-- 趋势延续风险
-- 需要精确时机
-- 止损要求严格
+**Risk Notes**:
+- Trend continuation risk
+- Requires precise timing
+- Strict stop-loss discipline is necessary
 
 ```python
-# 均值回归策略示例
+# Mean reversion strategy example
 reversion_result = strategies.mean_reversion_strategy(
     factor_data, price_data,
     rsi_oversold=30.0,      # RSI < 30
@@ -170,150 +170,150 @@ reversion_result = strategies.mean_reversion_strategy(
 )
 ```
 
-### 6. 低波动策略 (Low Volatility Strategy)
+### 6. Low Volatility Strategy
 
-**核心理念**: 低波动股票长期表现更好
+**Core Idea**: Low-volatility stocks may deliver better long-term risk-adjusted outcomes.
 
-**策略逻辑**:
-- 波动率 < 15%
-- 股息率 > 1.5%
-- 负债率 < 60%
-- 防御性配置
+**Strategy Logic**:
+- Volatility < 15%
+- Dividend yield > 1.5%
+- Debt ratio < 60%
+- Defensive allocation
 
-**适用条件**:
-- 市场不确定性高
-- 熊市或震荡市
-- 风险偏好低
+**Best Conditions**:
+- High market uncertainty
+- Bear or range-bound markets
+- Lower risk tolerance
 
-**风险提示**:
-- 可能错过牛市
-- 收益相对较低
-- 需要长期持有
+**Risk Notes**:
+- May lag in strong bull markets
+- Potentially lower absolute returns
+- Best suited for long holding periods
 
 ```python
-# 低波动策略示例
+# Low volatility strategy example
 low_vol_result = strategies.low_volatility_strategy(
     factor_data, price_data,
-    max_volatility=15.0,    # 波动率 < 15%
-    min_dividend=1.5        # 股息率 > 1.5%
+    max_volatility=15.0,    # volatility < 15%
+    min_dividend=1.5        # dividend yield > 1.5%
 )
 ```
 
-### 7. 行业轮动策略 (Sector Rotation Strategy)
+### 7. Sector Rotation Strategy
 
-**核心理念**: 不同经济周期下行业表现不同
+**Core Idea**: Sector performance shifts across economic cycles.
 
-**策略逻辑**:
-- 选择动量最强的3个行业
-- 每个行业选择前5只股票
-- 等权重配置
-- 月度调仓
+**Strategy Logic**:
+- Select the top 3 sectors by momentum
+- Pick the top 5 stocks in each sector
+- Equal-weight allocation
+- Monthly rebalancing
 
-**适用条件**:
-- 经济周期明显
-- 行业数据完整
-- 宏观分析能力强
+**Best Conditions**:
+- Clear economic cycle signals
+- Complete sector-level data
+- Strong macro analysis capability
 
-**风险提示**:
-- 行业集中度风险
-- 需要宏观判断
-- 换手率很高
+**Risk Notes**:
+- Sector concentration risk
+- Requires macro timing judgments
+- Very high turnover
 
 ```python
-# 行业轮动策略示例
+# Sector rotation strategy example
 rotation_result = strategies.sector_rotation_strategy(
     factor_data, price_data, sector_data
 )
 ```
 
-### 8. 风险平价策略 (Risk Parity Strategy)
+### 8. Risk Parity Strategy
 
-**核心理念**: 每个持仓贡献相等的风险
+**Core Idea**: Each position contributes an equal amount of risk.
 
-**策略逻辑**:
-- 基于波动率分配权重
-- 目标组合波动率10%
-- 质量筛选
-- 动态调整
+**Strategy Logic**:
+- Allocate weights based on volatility
+- Target portfolio volatility: 10%
+- Apply quality filters
+- Dynamic reallocation
 
-**适用条件**:
-- 风险控制要求高
-- 数据质量良好
-- 计算能力强
+**Best Conditions**:
+- Strong risk-control requirements
+- High-quality data
+- Sufficient computational resources
 
-**风险提示**:
-- 可能过度集中
-- 需要精确计算
-- 调仓成本较高
+**Risk Notes**:
+- Potential over-concentration
+- Requires precise risk calculations
+- Rebalancing costs may be higher
 
 ```python
-# 风险平价策略示例
+# Risk parity strategy example
 parity_result = strategies.risk_parity_strategy(
     factor_data, price_data,
-    target_volatility=10.0  # 目标波动率10%
+    target_volatility=10.0  # target volatility 10%
 )
 ```
 
-## 🚀 策略组合建议
+## 🚀 Suggested Strategy Portfolios
 
-### 保守型组合
-- 低波动策略 40%
-- 价值策略 30%
-- 风险平价策略 30%
+### Conservative Portfolio
+- Low Volatility Strategy: 40%
+- Value Strategy: 30%
+- Risk Parity Strategy: 30%
 
-### 平衡型组合
-- 多因子策略 40%
-- 质量成长策略 30%
-- 动量策略 30%
+### Balanced Portfolio
+- Multi-Factor Strategy: 40%
+- Quality Growth Strategy: 30%
+- Momentum Strategy: 30%
 
-### 进取型组合
-- 动量策略 40%
-- 行业轮动策略 30%
-- 均值回归策略 30%
+### Aggressive Portfolio
+- Momentum Strategy: 40%
+- Sector Rotation Strategy: 30%
+- Mean Reversion Strategy: 30%
 
-## 📈 策略评估指标
+## 📈 Strategy Evaluation Metrics
 
-### 收益指标
-- **年化收益率**: 策略的年化收益
-- **超额收益**: 相对于基准的超额收益
-- **信息比率**: 超额收益/跟踪误差
+### Return Metrics
+- **Annualized Return**: Annualized strategy performance
+- **Excess Return**: Return above benchmark
+- **Information Ratio**: Excess return / tracking error
 
-### 风险指标
-- **最大回撤**: 最大亏损幅度
-- **波动率**: 收益的标准差
-- **VaR**: 在险价值
+### Risk Metrics
+- **Maximum Drawdown**: Largest peak-to-trough loss
+- **Volatility**: Standard deviation of returns
+- **VaR**: Value at Risk
 
-### 其他指标
-- **夏普比率**: 风险调整后收益
-- **胜率**: 正收益天数占比
-- **换手率**: 策略调仓频率
+### Additional Metrics
+- **Sharpe Ratio**: Risk-adjusted return
+- **Win Rate**: Percentage of profitable trading days
+- **Turnover**: Rebalancing frequency
 
-## ⚠️ 风险提示
+## ⚠️ Risk Disclaimer
 
-1. **历史表现不代表未来**: 所有策略都基于历史数据，未来表现可能不同
-2. **市场环境变化**: 不同市场环境下策略表现差异很大
-3. **数据质量**: 策略效果很大程度上依赖于数据质量
-4. **交易成本**: 频繁调仓会产生较高的交易成本
-5. **流动性风险**: 某些股票可能存在流动性不足的问题
+1. **Past performance does not guarantee future results**: All strategies are built on historical data.
+2. **Market regime shifts**: Strategy performance can vary significantly by market environment.
+3. **Data quality dependency**: Strategy outcomes heavily depend on data quality.
+4. **Transaction costs**: Frequent rebalancing can materially reduce net returns.
+5. **Liquidity risk**: Some securities may have limited tradability.
 
-## 🔧 策略优化建议
+## 🔧 Strategy Optimization Suggestions
 
-### 参数优化
-- 使用交叉验证避免过拟合
-- 定期重新优化参数
-- 考虑市场环境变化
+### Parameter Optimization
+- Use cross-validation to reduce overfitting
+- Re-optimize parameters periodically
+- Incorporate market regime changes
 
-### 风险控制
-- 设置止损条件
-- 控制单只股票权重
-- 监控相关性变化
+### Risk Control
+- Define clear stop-loss rules
+- Cap single-stock weights
+- Monitor factor and asset correlations
 
-### 执行优化
-- 考虑交易成本
-- 优化调仓时机
-- 使用算法交易
+### Execution Optimization
+- Account for transaction costs
+- Improve rebalancing timing
+- Consider algorithmic execution
 
-## 📊 回测结果示例
+## 📊 Sample Backtest Output
 
 ```
 ============================================================
@@ -345,12 +345,12 @@ Win Rate: 61.2%
 Max Drawdown: -9.8%
 ```
 
-## 🎯 使用建议
+## 🎯 Practical Guidance
 
-1. **选择适合的策略**: 根据投资目标和风险偏好选择
-2. **组合使用**: 可以组合多个策略分散风险
-3. **定期评估**: 定期评估策略表现并调整
-4. **风险控制**: 始终把风险控制放在首位
-5. **持续学习**: 市场在变化，策略也需要进化
+1. **Pick strategies that match your goals**: Choose based on target return and risk tolerance.
+2. **Combine strategies**: Blend complementary approaches to diversify.
+3. **Review regularly**: Evaluate performance and rebalance strategy mix over time.
+4. **Prioritize risk management**: Risk control should always come first.
+5. **Keep learning**: Markets evolve, so strategies must evolve too.
 
-这些策略为量化投资提供了完整的工具集，你可以根据自己的需求进行选择和组合使用！ 
+These strategies provide a comprehensive toolkit for quantitative investing. You can select and combine them based on your specific objectives.

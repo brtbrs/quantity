@@ -74,6 +74,27 @@ Services:
 - Streamlit dashboard: `http://localhost:8501`
 - PostgreSQL: `localhost:${POSTGRES_PORT:-5432}`
 
+## Dashboard User Guide (Streamlit)
+
+The Streamlit dashboard (`http://localhost:8501`) uses an **explicit apply flow**:
+
+1. In the left sidebar, set:
+   - **Date Range**
+   - **Strategy**
+   - **Symbols**
+   - **Initial Capital**
+2. Click **🚀 Run Analysis** to apply changes.
+3. Review updated outputs across tabs:
+   - **Performance Analysis**: equity curve, drawdown, rolling metrics, and summary stats.
+   - **Strategy Backtest**: strategy-specific parameters and backtest simulation.
+   - **Market Data**: symbol chart, RSI, volume, and quick market stats.
+   - **AI Analysis**: sentiment and factor analysis modules.
+4. After any sidebar change, click **Run Analysis** again to refresh.
+
+Notes:
+- If no symbols are selected, analysis will not run.
+- End date must be later than start date.
+
 ## 5) Run functional modules (all from containers)
 
 ### a) Data Fetching / Data Management

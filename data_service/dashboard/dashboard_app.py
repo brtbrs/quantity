@@ -93,7 +93,22 @@ class TradingDashboard:
         
         # Header
         st.markdown('<h1 class="main-header">📈 Trading System Dashboard</h1>', unsafe_allow_html=True)
+        with st.expander("📘 How to use this dashboard", expanded=False):
+            st.markdown(
+                """
+                1. Use the left sidebar to set **Date Range**, **Strategy**, **Symbols**, and **Initial Capital**.
+                2. Click **🚀 Run Analysis** in the sidebar to apply your changes.
+                3. Review results across tabs:
+                    - **Performance Analysis**: summary metrics and portfolio charts.
+                    - **Strategy Backtest**: parameter tuning and backtest output.
+                    - **Market Data**: per-symbol price and indicators.
+                    - **AI Analysis**: sentiment and factor analysis demos.
+                4. Any time you change sidebar values, click **Run Analysis** again to refresh outputs.
+                """
+            )
         
+        self._initialize_dashboard_state()
+
         # Sidebar
         self._create_sidebar()
         
@@ -124,58 +139,99 @@ class TradingDashboard:
     def _create_sidebar(self):
         """Create sidebar with controls"""
         st.sidebar.title("🎛️ Dashboard Controls")
-        
-        # Date range selector
-        st.sidebar.subheader("📅 Date Range")
-        start_date = st.sidebar.date_input(
-            "Start Date",
-            value=datetime.now() - timedelta(days=365),
-            max_value=datetime.now()
-        )
-        end_date = st.sidebar.date_input(
-            "End Date",
-            value=datetime.now(),
-            max_value=datetime.now()
-        )
-        
-        # Strategy selector
-        st.sidebar.subheader("🎯 Strategy")
-        strategy_options = ["Momentum Strategy", "Value Strategy", "Mean Reversion", "Custom"]
-        selected_strategy = st.sidebar.selectbox("Select Strategy", strategy_options)
-        
-        # Symbols selector
-        st.sidebar.subheader("📈 Symbols")
-        symbols = st.sidebar.multiselect(
-            "Select Symbols",
-            ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA", "META", "NFLX"],
-            default=["AAPL", "GOOGL", "MSFT"]
-        )
-        
-        # Initial capital
-        st.sidebar.subheader("💰 Capital")
-        initial_capital = st.sidebar.number_input(
-            "Initial Capital ($)",
-            min_value=1000,
-            max_value=1000000,
-            value=100000,
-            step=10000
-        )
-        
-        # Store in session state
-        st.session_state.update({
-            'start_date': start_date,
-            'end_date': end_date,
-            'selected_strategy': selected_strategy,
-            'symbols': symbols,
-            'initial_capital': initial_capital
-        })
-    
+
+        with st.sidebar.form("dashboard_controls_form"):
+            st.caption("Update parameters below, then click **Run Analysis** to refresh all dashboard tabs.")
+
+            st.subheader("📅 Date Range")
+            start_date = st.date_input(
+                "Start Date",
+                value=st.session_state['start_date'],
+                max_value=datetime.now().date()
+            )
+            end_date = st.date_input(
+                "End Date",
+                value=st.session_state['end_date'],
+                max_value=datetime.now().date()
+            )
+
+            st.subheader("🎯 Strategy")
+            strategy_options = ["Momentum Strategy", "Value Strategy", "Mean Reversion", "Custom"]
+            selected_strategy = st.selectbox(
+                "Select Strategy",
+                strategy_options,
+                index=strategy_options.index(st.session_state['selected_strategy']) if st.session_state['selected_strategy'] in strategy_options else 2
+            )
+
+            st.subheader("📈 Symbols")
+            symbols = st.multiselect(
+                "Select Symbols",
+                ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "NVDA", "META", "NFLX"],
+                default=st.session_state['symbols']
+            )
+
+            st.subheader("💰 Capital")
+            initial_capital = st.number_input(
+                "Initial Capital ($)",
+                min_value=1000,
+                max_value=1000000,
+                value=st.session_state['initial_capital'],
+                step=10000
+            )
+
+            run_analysis = st.form_submit_button("🚀 Run Analysis", type="primary", use_container_width=True)
+
+        if run_analysis:
+            if end_date <= start_date:
+                st.sidebar.error("End Date must be after Start Date.")
+            elif not symbols:
+                st.sidebar.error("Select at least one symbol.")
+            else:
+                st.session_state.update({
+                    'start_date': start_date,
+                    'end_date': end_date,
+                    'selected_strategy': selected_strategy,
+                    'symbols': symbols,
+                    'initial_capital': int(initial_capital),
+                    'analysis_requested': True
+                })
+                st.sidebar.success("Analysis inputs applied. Dashboard refreshed.")
+
+        if not st.session_state.get('analysis_requested', False):
+            st.sidebar.info("Tip: Click **Run Analysis** after changing controls to refresh the dashboard output.")
+
+    def _initialize_dashboard_state(self):
+        """Initialize dashboard session state defaults."""
+        defaults = {
+            'start_date': datetime.now().date() - timedelta(days=365),
+            'end_date': datetime.now().date(),
+            'selected_strategy': 'Mean Reversion',
+            'symbols': ['AAPL', 'GOOGL', 'MSFT'],
+            'initial_capital': 100000,
+            'analysis_requested': False
+        }
+        for key, value in defaults.items():
+            st.session_state.setdefault(key, value)
+
+    def _get_current_config(self):
+        """Get currently applied dashboard configuration."""
+        return {
+            'start_date': st.session_state['start_date'],
+            'end_date': st.session_state['end_date'],
+            'selected_strategy': st.session_state['selected_strategy'],
+            'symbols': st.session_state['symbols'],
+            'initial_capital': st.session_state['initial_capital']
+        }
+
     def _show_performance_analysis(self):
         """Show performance analysis tab"""
         st.header("📊 Performance Analysis")
         
+        config = self._get_current_config()
+        st.caption(f"Applied configuration: {config['selected_strategy']} | {', '.join(config['symbols'])} | {config['start_date']} → {config['end_date']} | ${config['initial_capital']:,}")
+
         # Generate sample data for demonstration
-        sample_data = self._generate_sample_performance_data()
+        sample_data = self._generate_sample_performance_data(config)
         
         # Performance metrics
         col1, col2, col3, col4 = st.columns(4)
@@ -317,7 +373,7 @@ class TradingDashboard:
         timeframe = st.selectbox("Timeframe", ["1D", "1W", "1M", "3M", "6M", "1Y"])
         
         # Generate sample market data
-        market_data = self._generate_sample_market_data(symbol)
+        market_data = self._generate_sample_market_data(symbol, self._get_current_config())
         
         # Price chart
         st.subheader(f"📊 {symbol} Price Chart")
@@ -527,14 +583,16 @@ class TradingDashboard:
         log_df = pd.DataFrame(logs, columns=["Timestamp", "Level", "Message"])
         st.dataframe(log_df, width="stretch")
     
-    def _generate_sample_performance_data(self):
+    def _generate_sample_performance_data(self, config=None):
         """Generate sample performance data for demonstration"""
-        dates = pd.date_range(start='2023-01-01', end='2024-01-15', freq='D')
-        np.random.seed(42)
+        config = config or self._get_current_config()
+        dates = pd.date_range(start=config['start_date'], end=config['end_date'], freq='D')
+        seed_value = abs(hash((tuple(config['symbols']), config['selected_strategy'], int(config['initial_capital'])))) % (2**32)
+        np.random.seed(seed_value)
         
         # Generate equity curve
         returns = np.random.normal(0.0005, 0.02, len(dates))
-        equity = pd.Series(100000 * np.cumprod(1 + returns), index=dates)
+        equity = pd.Series(config['initial_capital'] * np.cumprod(1 + returns), index=dates)
         equity_data = pd.DataFrame({'equity': equity}, index=dates)
         
         # Calculate metrics
@@ -575,13 +633,15 @@ class TradingDashboard:
             'max_drawdown': -0.12,
             'win_rate': 0.65,
             'total_trades': 89,
-            'equity_curve': self._generate_sample_performance_data()['equity_data']
+            'equity_curve': self._generate_sample_performance_data(self._get_current_config())['equity_data']
         }
     
-    def _generate_sample_market_data(self, symbol):
+    def _generate_sample_market_data(self, symbol, config=None):
         """Generate sample market data"""
-        dates = pd.date_range(start='2023-01-01', end='2024-01-15', freq='D')
-        np.random.seed(42)
+        config = config or self._get_current_config()
+        dates = pd.date_range(start=config['start_date'], end=config['end_date'], freq='D')
+        seed_value = abs(hash((tuple(config['symbols']), config['selected_strategy'], int(config['initial_capital'])))) % (2**32)
+        np.random.seed(seed_value)
         
         # Generate price data
         returns = np.random.normal(0.0005, 0.02, len(dates))

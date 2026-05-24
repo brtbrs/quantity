@@ -7,7 +7,7 @@ Provides RESTful API endpoints for web management interface
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 from typing import Dict, List, Any, Optional
 import uvicorn
@@ -150,23 +150,7 @@ class APIServer:
         @self.app.get("/", response_class=HTMLResponse)
         async def root():
             """Serve the main dashboard page"""
-            return """
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Trading System Dashboard</title>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-                <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet">
-            </head>
-            <body>
-                <div id="app"></div>
-                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-                <script src="/static/js/app.js"></script>
-            </body>
-            </html>
-            """
+            return FileResponse("static/index.html")
         
         @self.app.get("/api/health")
         async def health_check():

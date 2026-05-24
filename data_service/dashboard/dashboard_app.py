@@ -31,7 +31,22 @@ except ImportError as e:
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("huggingface_hub").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
+
+
+@st.cache_resource
+def _get_nlp_processor() -> NLPProcessor:
+    """Create and cache NLP processor across Streamlit reruns."""
+    return NLPProcessor(auto_download_models=False)
+
+
+@st.cache_resource
+def _get_sentiment_calculator() -> SentimentFactorCalculator:
+    """Create and cache sentiment factor calculator across Streamlit reruns."""
+    return SentimentFactorCalculator()
+
 
 class TradingDashboard:
     """Main trading dashboard application"""
@@ -43,8 +58,8 @@ class TradingDashboard:
         self.backtest_engine = BacktestEngine()
         self.factor_calculator = FactorCalculator()
         self.factor_backtest = FactorBacktest()
-        self.nlp_processor = NLPProcessor()
-        self.sentiment_calculator = SentimentFactorCalculator()
+        self.nlp_processor = None
+        self.sentiment_calculator = None
         
     def run(self):
         """Run the dashboard application"""
@@ -362,6 +377,11 @@ class TradingDashboard:
         """Show AI analysis tab"""
         st.header("🤖 AI Analysis")
         
+        if self.nlp_processor is None:
+            self.nlp_processor = _get_nlp_processor()
+        if self.sentiment_calculator is None:
+            self.sentiment_calculator = _get_sentiment_calculator()
+
         # NLP Analysis
         st.subheader("📝 Sentiment Analysis")
         

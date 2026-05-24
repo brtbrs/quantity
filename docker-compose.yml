@@ -40,7 +40,7 @@ services:
       API_BASE_URL: http://api:${API_PORT:-8000}
     ports:
       - "${DASHBOARD_PORT:-8501}:8501"
-    command: ["python", "-m", "streamlit", "run", "data_service/dashboard/dashboard_app.py", "--server.port", "8501", "--server.address", "0.0.0.0", "--browser.gatherUsageStats", "false"]
+    command: ["python", "-m", "streamlit", "run", "data_service/dashboard/dashboard_app.py", "--server.port", "8501", "--server.address", "0.0.0.0", "--browser.gatherUsageStats", "false", "--server.fileWatcherType", "none"]
     depends_on:
       quantity-api:
         condition: service_started

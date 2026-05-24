@@ -58,6 +58,8 @@ class SystemStatusResponse(BaseModel):
     active_strategies: int
     total_trades: int
     system_metrics: Dict[str, Any]
+    performance_metrics: Optional[Dict[str, float]] = None
+    risk_metrics: Optional[Dict[str, float]] = None
 
 class APIServer:
     """FastAPI server for trading system web interface"""
@@ -183,12 +185,28 @@ class APIServer:
                     "api_calls_per_min": 156
                 }
                 
+                performance_metrics = {
+                    "total_return": 0.124,
+                    "sharpe_ratio": 1.42,
+                    "max_drawdown": 0.086,
+                    "win_rate": 0.61,
+                }
+
+                risk_metrics = {
+                    "var_95": 0.028,
+                    "cvar_95": 0.041,
+                    "beta": 1.08,
+                    "volatility": 0.19,
+                }
+
                 return SystemStatusResponse(
                     status="running",
                     uptime="2 days, 5 hours, 30 minutes",
                     active_strategies=3,
                     total_trades=1250,
-                    system_metrics=metrics
+                    system_metrics=metrics,
+                    performance_metrics=performance_metrics,
+                    risk_metrics=risk_metrics,
                 )
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))

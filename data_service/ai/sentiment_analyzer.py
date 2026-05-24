@@ -59,8 +59,11 @@ class SentimentAnalyzer:
             # Try to load more advanced local models
             try:
                 from transformers import pipeline
-                self.sentiment_pipeline = pipeline("sentiment-analysis", 
-                                                 model="cardiffnlp/twitter-roberta-base-sentiment")
+                self.sentiment_pipeline = pipeline(
+                    "sentiment-analysis",
+                    model="cardiffnlp/twitter-roberta-base-sentiment",
+                    revision="main"
+                )
                 self.logger.info("Local sentiment pipeline initialized")
             except ImportError:
                 self.sentiment_pipeline = None

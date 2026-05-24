@@ -98,11 +98,14 @@ Notes:
 ## 5) Run functional modules (all from containers)
 
 ### a) Data Fetching / Data Management
+> If you updated the repository recently, rebuild first so new dependencies/scripts are available in the image:
+> `docker compose build quantity-api`
+
 ```bash
-# multi-source public data fetching demo
+# multi-source public data fetching demo (Binance public endpoints)
 docker compose run --rm quantity-api python examples/fetch_public_data.py
 
-# yahoo example
+# yahoo example (requires yfinance in image; included after rebuild)
 docker compose run --rm quantity-api python examples/yahoo_example.py
 
 # real-time websocket chart demo

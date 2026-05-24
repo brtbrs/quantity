@@ -514,11 +514,11 @@ class TradingDashboard:
         
         # Generate equity curve
         returns = np.random.normal(0.0005, 0.02, len(dates))
-        equity = 100000 * np.cumprod(1 + returns)
+        equity = pd.Series(100000 * np.cumprod(1 + returns), index=dates)
         equity_data = pd.DataFrame({'equity': equity}, index=dates)
         
         # Calculate metrics
-        total_return = (equity[-1] / equity[0] - 1)
+        total_return = (equity.iloc[-1] / equity.iloc[0] - 1)
         annualized_return = total_return * 252 / len(dates)
         volatility = np.std(returns) * np.sqrt(252)
         sharpe_ratio = annualized_return / volatility if volatility > 0 else 0

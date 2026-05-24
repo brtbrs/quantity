@@ -19,7 +19,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 try:
     from data_service.backtest import BacktestEngine, PerformanceAnalyzer
-    from data_service.dashboard import ChartGenerator, DashboardWidgets
+    from data_service.dashboard.charts import ChartGenerator
+    from data_service.dashboard.widgets import DashboardWidgets
     from data_service.factors import FactorCalculator, FactorBacktest
     from data_service.strategies import StrategyRegistry
     from data_service.ai import NLPProcessor, SentimentFactorCalculator
@@ -198,12 +199,12 @@ class TradingDashboard:
         with col1:
             st.subheader("📈 Equity Curve")
             equity_fig = self.chart_generator.create_equity_curve(sample_data['equity_data'])
-            st.plotly_chart(equity_fig, use_container_width=True)
+            st.plotly_chart(equity_fig, width="stretch")
         
         with col2:
             st.subheader("📉 Drawdown Analysis")
             drawdown_fig = self.chart_generator.create_drawdown_chart(sample_data['drawdown_data'])
-            st.plotly_chart(drawdown_fig, use_container_width=True)
+            st.plotly_chart(drawdown_fig, width="stretch")
         
         # Additional charts
         col1, col2 = st.columns(2)
@@ -211,12 +212,12 @@ class TradingDashboard:
         with col1:
             st.subheader("📊 Returns Distribution")
             returns_fig = self.chart_generator.create_returns_distribution(sample_data['returns'])
-            st.plotly_chart(returns_fig, use_container_width=True)
+            st.plotly_chart(returns_fig, width="stretch")
         
         with col2:
             st.subheader("📈 Rolling Metrics")
             rolling_fig = self.chart_generator.create_rolling_metrics(sample_data['returns'])
-            st.plotly_chart(rolling_fig, use_container_width=True)
+            st.plotly_chart(rolling_fig, width="stretch")
         
         # Performance table
         st.subheader("📋 Detailed Performance Metrics")
@@ -233,7 +234,7 @@ class TradingDashboard:
             ["Total Trades", str(sample_data['total_trades'])],
         ], columns=["Metric", "Value"])
         
-        st.dataframe(metrics_df, use_container_width=True)
+        st.dataframe(metrics_df, width="stretch")
     
     def _show_strategy_backtest(self):
         """Show strategy backtest tab"""
@@ -306,7 +307,7 @@ class TradingDashboard:
         # Price chart
         st.subheader(f"📊 {symbol} Price Chart")
         price_fig = self.chart_generator.create_real_time_price_chart(market_data, symbol)
-        st.plotly_chart(price_fig, use_container_width=True)
+        st.plotly_chart(price_fig, width="stretch")
         
         # Technical indicators
         col1, col2 = st.columns(2)
@@ -321,7 +322,7 @@ class TradingDashboard:
             rsi_fig.add_hline(y=70, line_dash="dash", line_color="red", name="Overbought")
             rsi_fig.add_hline(y=30, line_dash="dash", line_color="green", name="Oversold")
             rsi_fig.update_layout(title="RSI", height=300)
-            st.plotly_chart(rsi_fig, use_container_width=True)
+            st.plotly_chart(rsi_fig, width="stretch")
         
         with col2:
             st.subheader("📊 Volume Analysis")
@@ -335,7 +336,7 @@ class TradingDashboard:
                 marker_color='rgba(0, 128, 255, 0.6)'
             ))
             volume_fig.update_layout(title="Trading Volume", height=300)
-            st.plotly_chart(volume_fig, use_container_width=True)
+            st.plotly_chart(volume_fig, width="stretch")
         
         # Market statistics
         st.subheader("📋 Market Statistics")
@@ -433,7 +434,7 @@ class TradingDashboard:
                     ["Size", 0.08, 0.07, 1.14, 0.45],
                 ], columns=["Factor", "Return", "Volatility", "Sharpe", "IC"])
                 
-                st.dataframe(factor_perf_df, use_container_width=True)
+                st.dataframe(factor_perf_df, width="stretch")
                 
                 # Factor correlation heatmap
                 st.subheader("🔥 Factor Correlation")
@@ -449,7 +450,7 @@ class TradingDashboard:
                     color_continuous_scale="RdBu",
                     aspect="auto"
                 )
-                st.plotly_chart(corr_fig, use_container_width=True)
+                st.plotly_chart(corr_fig, width="stretch")
     
     def _show_system_status(self):
         """Show system status tab"""
@@ -504,7 +505,7 @@ class TradingDashboard:
         ]
         
         log_df = pd.DataFrame(logs, columns=["Timestamp", "Level", "Message"])
-        st.dataframe(log_df, use_container_width=True)
+        st.dataframe(log_df, width="stretch")
     
     def _generate_sample_performance_data(self):
         """Generate sample performance data for demonstration"""
@@ -513,11 +514,11 @@ class TradingDashboard:
         
         # Generate equity curve
         returns = np.random.normal(0.0005, 0.02, len(dates))
-        equity = 100000 * np.cumprod(1 + returns)
+        equity = pd.Series(100000 * np.cumprod(1 + returns), index=dates)
         equity_data = pd.DataFrame({'equity': equity}, index=dates)
         
         # Calculate metrics
-        total_return = (equity[-1] / equity[0] - 1)
+        total_return = (equity.iloc[-1] / equity.iloc[0] - 1)
         annualized_return = total_return * 252 / len(dates)
         volatility = np.std(returns) * np.sqrt(252)
         sharpe_ratio = annualized_return / volatility if volatility > 0 else 0
@@ -617,7 +618,7 @@ class TradingDashboard:
         # Equity curve
         st.subheader("📈 Backtest Results")
         equity_fig = self.chart_generator.create_equity_curve(results['equity_curve'])
-        st.plotly_chart(equity_fig, use_container_width=True)
+        st.plotly_chart(equity_fig, width="stretch")
 
 def main():
     """Main function to run the dashboard"""

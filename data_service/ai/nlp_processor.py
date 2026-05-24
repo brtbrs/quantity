@@ -85,7 +85,8 @@ class NLPProcessor:
                     from transformers import pipeline
                     self.sentiment_pipeline = pipeline(
                         "sentiment-analysis",
-                        model="cardiffnlp/twitter-roberta-base-sentiment"
+                        model="cardiffnlp/twitter-roberta-base-sentiment",
+                        revision="main"
                     )
                     self.logger.info("Transformers sentiment pipeline loaded")
                 except ImportError:

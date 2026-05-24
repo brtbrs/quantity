@@ -147,7 +147,7 @@ class DashboardWidgets:
             
             st.dataframe(
                 positions_df[['Quantity', 'Avg Price', 'Current Price', 'Unrealized P&L', 'Unrealized P&L %']],
-                use_container_width=True
+                width="stretch"
             )
     
     def real_time_data_widget(self, symbol: str, price_data: pd.DataFrame):
@@ -297,7 +297,7 @@ class DashboardWidgets:
             
             st.dataframe(
                 display_orders[['timestamp', 'symbol', 'side', 'quantity', 'price', 'status']],
-                use_container_width=True
+                width="stretch"
             )
         else:
             st.info("No orders found.")

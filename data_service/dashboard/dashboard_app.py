@@ -19,7 +19,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 try:
     from data_service.backtest import BacktestEngine, PerformanceAnalyzer
-    from data_service.dashboard import ChartGenerator, DashboardWidgets
+    from data_service.dashboard.charts import ChartGenerator
+    from data_service.dashboard.widgets import DashboardWidgets
     from data_service.factors import FactorCalculator, FactorBacktest
     from data_service.strategies import StrategyRegistry
     from data_service.ai import NLPProcessor, SentimentFactorCalculator
@@ -513,11 +514,11 @@ class TradingDashboard:
         
         # Generate equity curve
         returns = np.random.normal(0.0005, 0.02, len(dates))
-        equity = 100000 * np.cumprod(1 + returns)
+        equity = pd.Series(100000 * np.cumprod(1 + returns), index=dates)
         equity_data = pd.DataFrame({'equity': equity}, index=dates)
         
         # Calculate metrics
-        total_return = (equity[-1] / equity[0] - 1)
+        total_return = (equity.iloc[-1] / equity.iloc[0] - 1)
         annualized_return = total_return * 252 / len(dates)
         volatility = np.std(returns) * np.sqrt(252)
         sharpe_ratio = annualized_return / volatility if volatility > 0 else 0

@@ -7,7 +7,7 @@ Provides RESTful API endpoints for web management interface
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 from typing import Dict, List, Any, Optional
 import uvicorn
@@ -58,6 +58,8 @@ class SystemStatusResponse(BaseModel):
     active_strategies: int
     total_trades: int
     system_metrics: Dict[str, Any]
+    performance_metrics: Optional[Dict[str, float]] = None
+    risk_metrics: Optional[Dict[str, float]] = None
 
 class APIServer:
     """FastAPI server for trading system web interface"""
@@ -148,23 +150,7 @@ class APIServer:
         @self.app.get("/", response_class=HTMLResponse)
         async def root():
             """Serve the main dashboard page"""
-            return """
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Trading System Dashboard</title>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-                <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet">
-            </head>
-            <body>
-                <div id="app"></div>
-                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-                <script src="/static/js/app.js"></script>
-            </body>
-            </html>
-            """
+            return FileResponse("static/index.html")
         
         @self.app.get("/api/health")
         async def health_check():
@@ -183,12 +169,28 @@ class APIServer:
                     "api_calls_per_min": 156
                 }
                 
+                performance_metrics = {
+                    "total_return": 0.124,
+                    "sharpe_ratio": 1.42,
+                    "max_drawdown": 0.086,
+                    "win_rate": 0.61,
+                }
+
+                risk_metrics = {
+                    "var_95": 0.028,
+                    "cvar_95": 0.041,
+                    "beta": 1.08,
+                    "volatility": 0.19,
+                }
+
                 return SystemStatusResponse(
                     status="running",
                     uptime="2 days, 5 hours, 30 minutes",
                     active_strategies=3,
                     total_trades=1250,
-                    system_metrics=metrics
+                    system_metrics=metrics,
+                    performance_metrics=performance_metrics,
+                    risk_metrics=risk_metrics,
                 )
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))

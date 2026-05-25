@@ -17,7 +17,8 @@ setup(
         'redis',
         'requests',
         'textblob',
-        'openpyxl'
+        'openpyxl',
+        'yfinance'
     ],
     extras_require={
         'test': [

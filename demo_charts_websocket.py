@@ -114,6 +114,7 @@ def demo_plotly_charts():
     print("3. 创建因子分析图...")
     
     # 生成因子数据
+    symbols = list(market_data.keys())
     factor_calc = FactorCalculator()
     factor_data = pd.DataFrame()
     
@@ -140,6 +141,7 @@ def demo_plotly_charts():
     print("4. 创建投资组合表现图...")
     
     # 模拟投资组合数据
+    dates = data.index
     portfolio_returns = np.random.normal(0.001, 0.02, len(dates))
     equity_curve = pd.Series((1 + pd.Series(portfolio_returns)).cumprod(), index=dates)
     

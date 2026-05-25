@@ -18,7 +18,7 @@ COPY data_service ./data_service
 COPY static ./static
 COPY examples ./examples
 COPY tests ./tests
-COPY run_web_interface.py run_dashboard.py main.py ./
+COPY run_web_interface.py run_dashboard.py main.py demo_charts_websocket.py ./
 
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -e .[ai,visualization,realtime,web,test] && \

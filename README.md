@@ -16,6 +16,7 @@ Put keys in `.env`:
 - `OPENAI_API_KEY` for AI-powered analysis
 - `ALPHA_VANTAGE_API_KEY` for Alpha Vantage data
 - `BINANCE_API_KEY` + `BINANCE_API_SECRET` for Binance private endpoints
+- Binance market endpoint can vary by region/network. Set `BINANCE_TLD` in `.env` if needed (for example: `com` or `us`).
 
 ## 3) Database (PostgreSQL) + DDL/DML
 This repository now ships PostgreSQL init SQL at:

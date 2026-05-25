@@ -16,6 +16,7 @@ Put keys in `.env`:
 - `OPENAI_API_KEY` for AI-powered analysis
 - `ALPHA_VANTAGE_API_KEY` for Alpha Vantage data
 - `BINANCE_API_KEY` + `BINANCE_API_SECRET` for Binance private endpoints
+- Binance market endpoint can vary by region/network. Set `BINANCE_TLD` in `.env` if needed (for example: `com` or `us`).
 
 ## 3) Database (PostgreSQL) + DDL/DML
 This repository now ships PostgreSQL init SQL at:
@@ -98,11 +99,14 @@ Notes:
 ## 5) Run functional modules (all from containers)
 
 ### a) Data Fetching / Data Management
+> If you updated the repository recently, rebuild first so new dependencies/scripts are available in the image:
+> `docker compose build quantity-api`
+
 ```bash
-# multi-source public data fetching demo
+# multi-source public data fetching demo (Binance public endpoints)
 docker compose run --rm quantity-api python examples/fetch_public_data.py
 
-# yahoo example
+# yahoo example (requires yfinance in image; included after rebuild)
 docker compose run --rm quantity-api python examples/yahoo_example.py
 
 # real-time websocket chart demo

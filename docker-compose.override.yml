@@ -3,7 +3,7 @@ services:
     volumes:
       - ./data_service:/app/data_service
       - ./examples:/app/examples
-      - ./*.py:/app/*.py
+      - .*.py:/app/*.py
     command: ["python", "-m", "uvicorn", "data_service.web.api_server:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
   quantity-dashboard:
